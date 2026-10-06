@@ -1,80 +1,102 @@
-﻿using UnityEngine;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyHealth : MonoBehaviour
 {
-    public int startingHealth = 100;
+    public EnemyStats stats;
     public int currentHealth;
-    public float sinkSpeed = 2.5f;
-    public int scoreValue = 10;
     public AudioClip deathClip;
 
+    protected Animator anim;
+    protected AudioSource enemyAudio;
+    protected ParticleSystem hitParticles;
+    protected CapsuleCollider capsuleCollider;
+    protected Rigidbody myBody;
+    protected NavMeshAgent myLegs;
+    protected bool isDead;
+    protected bool isSinking;
 
-    Animator anim;
-    AudioSource enemyAudio;
-    ParticleSystem hitParticles;
-    CapsuleCollider capsuleCollider;
-    bool isDead;
-    bool isSinking;
+    protected int deadHash;
 
+    protected EnemyPool pool;
 
-    void Awake ()
+    public void SetPool(EnemyPool pool)
     {
-        anim = GetComponent <Animator> ();
-        enemyAudio = GetComponent <AudioSource> ();
-        hitParticles = GetComponentInChildren <ParticleSystem> ();
-        capsuleCollider = GetComponent <CapsuleCollider> ();
-
-        currentHealth = startingHealth;
+        this.pool = pool;
     }
 
-
-    void Update ()
+    void Awake()
     {
-        if(isSinking)
+        anim = GetComponent<Animator>();
+        enemyAudio = GetComponent<AudioSource>();
+        hitParticles = GetComponentInChildren<ParticleSystem>();
+        capsuleCollider = GetComponent<CapsuleCollider>();
+        myBody = GetComponent<Rigidbody>();
+        myLegs = GetComponent<NavMeshAgent>();
+
+
+        currentHealth = stats.startingHealth;
+
+        deadHash = Animator.StringToHash("Dead");
+    }
+
+    void Update()
+    {
+        if (isSinking)
         {
-            transform.Translate (-Vector3.up * sinkSpeed * Time.deltaTime);
+            transform.Translate(-Vector3.up * stats.sinkSpeed * Time.deltaTime);
         }
     }
 
-
-    public void TakeDamage (int amount, Vector3 hitPoint)
+    public void TakeDamage(int amount, Vector3 hitPoint)
     {
-        if(isDead)
+        if (isDead)
             return;
 
-        enemyAudio.Play ();
+        enemyAudio.Play();
 
         currentHealth -= amount;
-            
+
         hitParticles.transform.position = hitPoint;
         hitParticles.Play();
 
-        if(currentHealth <= 0)
+        if (currentHealth <= 0)
         {
-            Death ();
+            Death();
         }
     }
 
-
-    void Death ()
+    void Death()
     {
         isDead = true;
 
         capsuleCollider.isTrigger = true;
 
-        anim.SetTrigger ("Dead");
+        anim.SetTrigger(deadHash);
 
         enemyAudio.clip = deathClip;
-        enemyAudio.Play ();
+        enemyAudio.Play();
     }
 
-
-    public void StartSinking ()
+    public void StartSinking()
     {
-        GetComponent <UnityEngine.AI.NavMeshAgent> ().enabled = false;
-        GetComponent <Rigidbody> ().isKinematic = true;
+        myLegs.enabled = false;
+        myBody.isKinematic = true;
         isSinking = true;
-        ScoreManager.score += scoreValue;
-        Destroy (gameObject, 2f);
+        ScoreManager.score.score += stats.scoreValue;
+
+        StartCoroutine(ReturnToPool());
+        //Destroy (gameObject, 2f); //Check ReturnToPool
+    }
+
+    IEnumerator ReturnToPool()
+    {
+        yield return new WaitForSeconds(2f);
+        gameObject.SetActive(false);
+        if (pool != null)
+        {
+            pool.CheckEnemyIDThenQueue(gameObject, stats.enemyID); //On Disable does not work here because I believe it only works when the script is disabled, not the object it's attached to
+        }
     }
 }

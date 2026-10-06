@@ -16,6 +16,7 @@ public class PlayerHealth : MonoBehaviour
 
 
     Animator anim;
+    int dieHash;
     AudioSource playerAudio;
     PlayerMovement playerMovement;
     PlayerShooting playerShooting;
@@ -30,6 +31,8 @@ public class PlayerHealth : MonoBehaviour
         playerMovement = GetComponent <PlayerMovement> ();
         playerShooting = GetComponentInChildren <PlayerShooting> ();
         currentHealth = startingHealth;
+
+        dieHash = Animator.StringToHash("Die"); //Hashing! See Player Movement for the important definitions
     }
 
 
@@ -70,7 +73,7 @@ public class PlayerHealth : MonoBehaviour
 
         playerShooting.DisableEffects ();
 
-        anim.SetTrigger ("Die");
+        anim.SetTrigger (dieHash);
 
         playerAudio.clip = deathClip;
         playerAudio.Play ();

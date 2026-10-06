@@ -6,15 +6,18 @@ public class PlayerMovement : MonoBehaviour
 
 	private Vector3 movement;
 	private Animator anim;
+	private int isWalkingHash; //Hashing for anims!
 	private Rigidbody playerRigidbody;
 	private int floorMask;
 	private float camRayLength = 100f;
 
 	void Awake()
 	{
-		floorMask = LayerMask.GetMask("Floor");
-		anim = GetComponent<Animator>();
-		playerRigidbody = GetComponent<Rigidbody>();
+		floorMask = LayerMask.GetMask("Floor"); //This stuff is caching
+		anim = GetComponent<Animator>(); //This too
+		playerRigidbody = GetComponent<Rigidbody>(); //This three
+
+		isWalkingHash = Animator.StringToHash("IsWalking"); //Animators take the String name and convert it to a hash every single time. We can do it for them ahead of time.
 	}
 
 	void FixedUpdate()
@@ -53,6 +56,6 @@ public class PlayerMovement : MonoBehaviour
 	{
 		bool walking = h != 0f || v != 0f;
 
-		anim.SetBool("IsWalking", walking);
+		anim.SetBool(isWalkingHash, walking);
 	}
 }

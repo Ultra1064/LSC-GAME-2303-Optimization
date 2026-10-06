@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerShooting : MonoBehaviour
 {
+    //PlayerActions input; //Can't Generate a C# Script, it breaks on creation.
     public int damagePerShot = 20;
     public float timeBetweenBullets = 0.15f;
     public float range = 100f;
@@ -25,6 +27,7 @@ public class PlayerShooting : MonoBehaviour
         gunLine = GetComponent <LineRenderer> ();
         gunAudio = GetComponent<AudioSource> ();
         gunLight = GetComponent<Light> ();
+        //input = new PlayerActions();
     }
 
 
@@ -32,10 +35,10 @@ public class PlayerShooting : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-		if(Input.GetButton ("Fire1") && timer >= timeBetweenBullets && Time.timeScale != 0)
+		/*if(Input.GetButton ("Fire1") && timer >= timeBetweenBullets && Time.timeScale != 0)
         {
             Shoot ();
-        }
+        }*/
 
         if(timer >= timeBetweenBullets * effectsDisplayTime)
         {
@@ -50,6 +53,11 @@ public class PlayerShooting : MonoBehaviour
         gunLight.enabled = false;
     }
 
+    public void OnShootInput()
+    {
+        if (timer >= timeBetweenBullets && Time.timeScale != 0)
+            { Shoot (); }
+    }
 
     void Shoot ()
     {

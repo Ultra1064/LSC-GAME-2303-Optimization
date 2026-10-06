@@ -4,20 +4,19 @@ using System.Collections;
 
 public class ScoreManager : MonoBehaviour
 {
-    public static int score;
-
+    public ScoreStat score;
 
     [SerializeField] Text text;
 
 
     void Awake ()
     {
-        score = 0;
+        score.score = 0;
     }
 
 
     void Update ()
     {
-        text.text = "Score: " + score;
+        text.text = "Score: " + score.score;
     }
 }
